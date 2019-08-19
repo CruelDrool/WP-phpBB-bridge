@@ -5,7 +5,7 @@ Plugin URI: https://www.nam-guild.com
 Description: Will attempt to log people into Wordpress if they are logged into a phpBB forum.
 Version: 0.1.11 Alpha
 Author: CruelDrool
-Author URI: http://www.nam-guild.com
+Author URI: https://www.nam-guild.com
 */
 
 $plugin_path = dirname(__FILE__);
