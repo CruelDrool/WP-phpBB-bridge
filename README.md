@@ -5,14 +5,15 @@ Originally created in 2010, and left alone except for very minor changes. Wasn't
 
 19th of August 2019 I decided to make a proper repository for this plugin.
 
-For those that feel the need to try it out, the following write up is based upon my notes. (NB! May be flawed since I haven't re-tried this since 2010). Anyway, here we go:
-1. Use InnoDB as storage engine. (I exported, edited the export to use InnoDB when re-inserted to the database).
-2. Best if done on a fresh Wordpress. (I did it on a existing one).
-3. Should activate the plugin first (I cheated and did this in the database the first time)
+For those that feel the need to try it out, the following write up is based upon my notes. NB! May be flawed since I haven't re-tried this any of this since 2010. Proceed at your own peril! Anyway, here we go:
+1. Have access to a [Founder](https://wiki.phpbb.com/Founder) user on your phpBB so that you gain administrator capabilities automatically when everything is in place.
+2. Use InnoDB as storage engine. (I exported, and then edited the exported .sql file so that the tables would be re-inserted into the database using InnoDB).
+3. Best if done on a fresh Wordpress. (I did it on a existing one).
+4. Should activate the plugin first (I cheated and did this in the database the first time)
    1. Go to **Settings** -> **CruelDrool Bridge** for settings.
    2. Set the correct URL and path to phpBB before proceeding. 
    3. Activate the Bridge
-4. Re-create the table *wp_users* as a [view](https://mariadb.com/kb/en/library/create-view/) based upon the table *phpbb_users*: 
+5. Re-create the table *wp_users* as a [view](https://mariadb.com/kb/en/library/create-view/) based upon the table *phpbb_users*: 
 ```SQL
 ALTER TABLE wp_users RENAME TO wp_users_bak;
 
@@ -31,7 +32,8 @@ AS
          AND user_type != 2
 WITH cascaded CHECK OPTION;
 ```
-5. Re-create *wp_usermeta* (you may be able to get away with just truncating and altering the table). Basing the following code on export from [phpMyAdmin](https://www.phpmyadmin.net/), since Wordpress updates have altered the table since I first did it:
+6. Re-create *wp_usermeta* (you may be able to get away with just truncating and altering the table). Basing the following code on export from [phpMyAdmin](https://www.phpmyadmin.net/), since Wordpress updates have altered the table since I first did it:
+(Note that the inserts are for user_id 2. As the way the plugin is written now, you may be able to skip doing any inserts as long as you're a [Founder](https://wiki.phpbb.com/Founder))
 ```SQL
 ALTER TABLE wp_usermeta RENAME TO wp_usermeta_bak; 
 
@@ -69,7 +71,7 @@ ALTER TABLE wp_usermeta MODIFY umeta_id bigint(20) UNSIGNED NOT NULL AUTO_INCREM
 
 ALTER TABLE wp_usermeta ADD CONSTRAINT wp_usermeta_fk FOREIGN KEY(user_id) REFERENCES phpbb_users(user_id) ON DELETE CASCADE;
 ```
-6. Change a few PHP-files in phpBB, so that it allows redirect back to Wordpress after logging in:
+7. Change a few PHP-files in phpBB, so that it allows redirect back to Wordpress after logging in:
 ```PHP
 // File: /includes/functions.php
 
