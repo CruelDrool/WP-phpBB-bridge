@@ -1,4 +1,4 @@
-# WP-phpBB-bridge
+# WordPress-to-phpBB bridge
 Plugin that is used on [nam-guild.com](https://nam-guild.com) to connect Wordpress (5.x) and phpBB (3.0.14). Also includes a sidebar widget for logging onto phpBB. The widget is based upon [Mike Jolley's](http://blue-anvil.com) plugin named [Sidebar Login](http://wordpress.org/extend/plugins/sidebar-login/).
 
 Originally created in 2010, and left alone except for very minor changes. Wasn't properly worked on until a few days ago when I decided to finally upgrade to the lastest version of Wordpress. With that I needed to update this plugin in order for it to work properly.
