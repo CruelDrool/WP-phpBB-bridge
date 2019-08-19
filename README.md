@@ -5,7 +5,7 @@ Originally created in 2010, and left alone except for very minor changes. Wasn't
 
 19th of August 2019 I decided to make a proper repository for this plugin.
 
-For those that feel the need to try it out, the following write up is based upon my notes. NB! May be flawed since I haven't re-tried this any of this since 2010. Proceed at your own peril! Anyway, here we go:
+For those that feel the need to try it out, the following write up is based upon my notes. NB! May be flawed since I haven't re-tried any of this since 2010. Proceed at your own peril! Anyway, here we go:
 1. Have access to a [Founder](https://wiki.phpbb.com/Founder) user on your phpBB so that you gain administrator capabilities automatically when everything is in place.
 2. Use InnoDB as storage engine. (I exported, and then edited the exported .sql file so that the tables would be re-inserted into the database using InnoDB).
 3. Best if done on a fresh Wordpress. (I did it on a existing one).
