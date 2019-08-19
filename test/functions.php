@@ -118,87 +118,195 @@ function wpbb_comment_reply_link($args = array(), $comment = null, $post = null)
 }
 
 
-function wpbb_list_comments($args = array(), $comments = null ) {
+function wpbb_list_comments( $args = array(), $comments = null ) {
 	global $wp_query, $comment_alt, $comment_depth, $comment_thread_alt, $overridden_cpage, $in_comment_loop;
 
 	$in_comment_loop = true;
 
-	$comment_alt = $comment_thread_alt = 0;
+	$comment_alt   = $comment_thread_alt = 0;
 	$comment_depth = 1;
 
-	$defaults = array('walker' => null, 'max_depth' => '', 'style' => 'ul', 'callback' => null, 'end-callback' => null, 'type' => 'all',
-		'page' => '', 'per_page' => '', 'avatar_size' => 64, 'reverse_top_level' => null, 'reverse_children' => '');
+	$defaults = array(
+		'walker'            => null,
+		'max_depth'         => '',
+		'style'             => 'ul',
+		'callback'          => null,
+		'end-callback'      => null,
+		'type'              => 'all',
+		'page'              => '',
+		'per_page'          => '',
+		'avatar_size'       => 32,
+		'reverse_top_level' => null,
+		'reverse_children'  => '',
+		'format'            => current_theme_supports( 'html5', 'comment-list' ) ? 'html5' : 'xhtml',
+		'short_ping'        => false,
+		'echo'              => true,
+	);
 
 	$r = wp_parse_args( $args, $defaults );
+
+	/**
+	 * Filters the arguments used in retrieving the comment list.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @see wp_list_comments()
+	 *
+	 * @param array $r An array of arguments for displaying comments.
+	 */
+	$r = apply_filters( 'wp_list_comments_args', $r );
 
 	// Figure out what comments we'll be looping through ($_comments)
 	if ( null !== $comments ) {
 		$comments = (array) $comments;
-		if ( empty($comments) )
+		if ( empty( $comments ) ) {
 			return;
+		}
 		if ( 'all' != $r['type'] ) {
-			$comments_by_type = &separate_comments($comments);
-			if ( empty($comments_by_type[$r['type']]) )
+			$comments_by_type = separate_comments( $comments );
+			if ( empty( $comments_by_type[ $r['type'] ] ) ) {
 				return;
-			$_comments = $comments_by_type[$r['type']];
+			}
+			$_comments = $comments_by_type[ $r['type'] ];
 		} else {
 			$_comments = $comments;
 		}
 	} else {
-		if ( empty($wp_query->comments) )
-			return;
-		if ( 'all' != $r['type'] ) {
-			if ( empty($wp_query->comments_by_type) )
-				$wp_query->comments_by_type = &separate_comments($wp_query->comments);
-			if ( empty($wp_query->comments_by_type[$r['type']]) )
-				return;
-			$_comments = $wp_query->comments_by_type[$r['type']];
+		/*
+		 * If 'page' or 'per_page' has been passed, and does not match what's in $wp_query,
+		 * perform a separate comment query and allow Walker_Comment to paginate.
+		 */
+		if ( $r['page'] || $r['per_page'] ) {
+			$current_cpage = get_query_var( 'cpage' );
+			if ( ! $current_cpage ) {
+				$current_cpage = 'newest' === get_option( 'default_comments_page' ) ? 1 : $wp_query->max_num_comment_pages;
+			}
+
+			$current_per_page = get_query_var( 'comments_per_page' );
+			if ( $r['page'] != $current_cpage || $r['per_page'] != $current_per_page ) {
+				$comment_args = array(
+					'post_id' => get_the_ID(),
+					'orderby' => 'comment_date_gmt',
+					'order'   => 'ASC',
+					'status'  => 'approve',
+				);
+
+				if ( is_user_logged_in() ) {
+					$comment_args['include_unapproved'] = get_current_user_id();
+				} else {
+					$unapproved_email = wp_get_unapproved_comment_author_email();
+
+					if ( $unapproved_email ) {
+						$comment_args['include_unapproved'] = array( $unapproved_email );
+					}
+				}
+
+				$comments = get_comments( $comment_args );
+
+				if ( 'all' != $r['type'] ) {
+					$comments_by_type = separate_comments( $comments );
+					if ( empty( $comments_by_type[ $r['type'] ] ) ) {
+						return;
+					}
+
+					$_comments = $comments_by_type[ $r['type'] ];
+				} else {
+					$_comments = $comments;
+				}
+			}
+
+			// Otherwise, fall back on the comments from `$wp_query->comments`.
 		} else {
-			$_comments = $wp_query->comments;
+			if ( empty( $wp_query->comments ) ) {
+				return;
+			}
+			if ( 'all' != $r['type'] ) {
+				if ( empty( $wp_query->comments_by_type ) ) {
+					$wp_query->comments_by_type = separate_comments( $wp_query->comments );
+				}
+				if ( empty( $wp_query->comments_by_type[ $r['type'] ] ) ) {
+					return;
+				}
+				$_comments = $wp_query->comments_by_type[ $r['type'] ];
+			} else {
+				$_comments = $wp_query->comments;
+			}
+
+			if ( $wp_query->max_num_comment_pages ) {
+				$default_comments_page = get_option( 'default_comments_page' );
+				$cpage                 = get_query_var( 'cpage' );
+				if ( 'newest' === $default_comments_page ) {
+					$r['cpage'] = $cpage;
+
+					/*
+					* When first page shows oldest comments, post permalink is the same as
+					* the comment permalink.
+					*/
+				} elseif ( $cpage == 1 ) {
+					$r['cpage'] = '';
+				} else {
+					$r['cpage'] = $cpage;
+				}
+
+				$r['page']     = 0;
+				$r['per_page'] = 0;
+			}
 		}
 	}
 
-	if ( '' === $r['per_page'] && get_option('page_comments') )
-		$r['per_page'] = get_query_var('comments_per_page');
+	if ( '' === $r['per_page'] && get_option( 'page_comments' ) ) {
+		$r['per_page'] = get_query_var( 'comments_per_page' );
+	}
 
-	if ( empty($r['per_page']) ) {
+	if ( empty( $r['per_page'] ) ) {
 		$r['per_page'] = 0;
-		$r['page'] = 0;
+		$r['page']     = 0;
 	}
 
 	if ( '' === $r['max_depth'] ) {
-		if ( get_option('thread_comments') )
-			$r['max_depth'] = get_option('thread_comments_depth');
-		else
+		if ( get_option( 'thread_comments' ) ) {
+			$r['max_depth'] = get_option( 'thread_comments_depth' );
+		} else {
 			$r['max_depth'] = -1;
+		}
 	}
 
 	if ( '' === $r['page'] ) {
-		if ( empty($overridden_cpage) ) {
-			$r['page'] = get_query_var('cpage');
+		if ( empty( $overridden_cpage ) ) {
+			$r['page'] = get_query_var( 'cpage' );
 		} else {
-			$threaded = ( -1 != $r['max_depth'] );
-			$r['page'] = ( 'newest' == get_option('default_comments_page') ) ? get_comment_pages_count($_comments, $r['per_page'], $threaded) : 1;
+			$threaded  = ( -1 != $r['max_depth'] );
+			$r['page'] = ( 'newest' == get_option( 'default_comments_page' ) ) ? get_comment_pages_count( $_comments, $r['per_page'], $threaded ) : 1;
 			set_query_var( 'cpage', $r['page'] );
 		}
 	}
 	// Validation check
-	$r['page'] = intval($r['page']);
-	if ( 0 == $r['page'] && 0 != $r['per_page'] )
+	$r['page'] = intval( $r['page'] );
+	if ( 0 == $r['page'] && 0 != $r['per_page'] ) {
 		$r['page'] = 1;
+	}
 
-	if ( null === $r['reverse_top_level'] )
-		$r['reverse_top_level'] = ( 'desc' == get_option('comment_order') );
+	if ( null === $r['reverse_top_level'] ) {
+		$r['reverse_top_level'] = ( 'desc' == get_option( 'comment_order' ) );
+	}
 
-	extract( $r, EXTR_SKIP );
+	wp_queue_comments_for_comment_meta_lazyload( $_comments );
 
-	if ( empty($walker) )
+	if ( empty( $r['walker'] ) ) {
 		$walker = new Wpbb_Walker_Comment;
+	} else {
+		$walker = $r['walker'];
+	}
 
-	$walker->paged_walk($_comments, $max_depth, $page, $per_page, $r);
-	$wp_query->max_num_comment_pages = $walker->max_pages;
+	$output = $walker->paged_walk( $_comments, $r['max_depth'], $r['page'], $r['per_page'], $r );
 
 	$in_comment_loop = false;
+
+	if ( $r['echo'] ) {
+		echo $output;
+	} else {
+		return $output;
+	}
 }
 
 
