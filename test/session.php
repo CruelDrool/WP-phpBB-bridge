@@ -70,12 +70,11 @@ function wpbb_init() {
 	$user_id = $user->data['user_id'];
 	$user_type = $user->data['user_type'];
 	$wp_user = wp_get_current_user();
-	
+		
 	if ($user_id > 1 && $user_type != 1 && $user_type != 2) // Attempt to log on Wordpress if logged on phpBB
 	{	
 		$is_founder = ($user_type == 3) ? true : false;
 		// $is_globalmod = $auth->acl_get('m_');
-		$wpcap = get_user_meta($user_id, 'wp_capabilities'); 
 		
 		$current_session_id = $user->session_id;
 		$stored_session_id = get_user_meta($user_id, 'session_id', true);

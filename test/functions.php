@@ -360,37 +360,41 @@ function wpbb_get_privmsg()
 	return $l_privmsgs_text;
 }
 
-function wpbb_set_capabilities($userid,$capability = '')
+function wpbb_set_capabilities($userid, $capability = '')
 {
+	global $wpdb;
+	
+	$blog_prefix = $wpdb->get_blog_prefix(get_current_blog_id());
+
 	switch ($capability)
 	{
 		case 'administrator':
-			update_user_meta($userid, 'wp_capabilities', array('administrator'=>1));
-			update_user_meta($userid, 'wp_user_level', 10);
+			update_user_meta($userid, $blog_prefix . 'capabilities', array('administrator'=>1));
+			update_user_meta($userid, $blog_prefix . 'user_level', 10);
 		break;
 		case 'editor':
-			update_user_meta($userid, 'wp_capabilities', array('editor'=>1));
-			update_user_meta($userid, 'wp_user_level', 7);
+			update_user_meta($userid, $blog_prefix . 'capabilities', array('editor'=>1));
+			update_user_meta($userid, $blog_prefix . 'user_level', 7);
 		break;
 		case 'author':
-			update_user_meta($userid, 'wp_capabilities', array('author'=>1));
-			update_user_meta($userid, 'wp_user_level', 2);
+			update_user_meta($userid, $blog_prefix . 'capabilities', array('author'=>1));
+			update_user_meta($userid, $blog_prefix . 'user_level', 2);
 		break;
 		case 'contributor':
-			update_user_meta($userid, 'wp_capabilities', array('contributor'=>1));
-			update_user_meta($userid, 'wp_user_level', 1);
+			update_user_meta($userid, $blog_prefix . 'capabilities', array('contributor'=>1));
+			update_user_meta($userid, $blog_prefix . 'user_level', 1);
 		break;
 		case 'subscriber':
-			update_user_meta($userid, 'wp_capabilities', array('subscriber'=>1));
-			update_user_meta($userid, 'wp_user_level', 0);
+			update_user_meta($userid, $blog_prefix . 'capabilities', array('subscriber'=>1));
+			update_user_meta($userid, $blog_prefix . 'user_level', 0);
 		break;
 		case 'none':
-			update_user_meta($userid, 'wp_capabilities', array());
-			update_user_meta($userid, 'wp_user_level', 0);
+			update_user_meta($userid, $blog_prefix . 'capabilities', array());
+			update_user_meta($userid, $blog_prefix . 'user_level', 0);
 		break;
 		default:
-			update_user_meta($userid, 'wp_capabilities', array('subscriber'=>1));
-			update_user_meta($userid, 'wp_user_level', 0);
+			update_user_meta($userid, $blog_prefix . 'capabilities', array('subscriber'=>1));
+			update_user_meta($userid, $blog_prefix . 'user_level', 0);
 		break;
 	}
 }
