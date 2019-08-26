@@ -76,11 +76,13 @@ function wpbb_init() {
 		$is_founder = ($user_type == 3) ? true : false;
 		// $is_globalmod = $auth->acl_get('m_');
 		
-		$current_session_id = $user->session_id;
-		$stored_session_id = get_user_meta($user_id, 'session_id', true);
+		// $current_session_id = $user->session_id;
+		// $stored_session_id = get_user_meta($user_id, 'session_id', true);
 		
-		if ( $current_session_id != $stored_session_id ) 
-		// Check if session ID has changed. If so, log onto Wordpress
+		// if ( $current_session_id != $stored_session_id ) 
+		if ( $wp_user->ID != $user_id ) 
+		// Using session id to compare wasn't really working if Wordpress timed you out and the stored session ID wasn't updated.
+		// Trying with user ID checking instead.
 		// Changing the username in phpBB/the database seems to log the user out in Wordpress. 
 		// Probably because Wordpress doesn't allow username changes.
 		{
@@ -89,7 +91,7 @@ function wpbb_init() {
 			// Maybe not necessary, but better safe than sorry.
 			wp_set_current_user($user_id);
 			wp_set_auth_cookie($user_id, true);
-			update_user_meta($user_id, 'session_id', $user->session_id);
+			// update_user_meta($user_id, 'session_id', $user->session_id);
 		}
 		// Insert some meta-data based on data from phpbb.
 		if ( empty(get_user_meta($user_id, 'has_been_given_defaults', true)))
