@@ -493,7 +493,7 @@ function wpbb_get_avatar($null, $id_or_email, $args){
 	if (isset($id)) {
 		$url = wpbb_get_avatar_url($id);
 		if (!empty($url)) {
-			return '<img alt="'.$args['alt'].'" src="'.$url.'" class="avatar avatar-'.$args['size'].' photo" width="'.$args['size'].'" />';
+			return '<img alt="'.$args['alt'].'" src="'.$url.'" class="avatar avatar-'. (int) $args['size'] . ' photo" width="' . (int) $args['size'] . '" '. $args['extra_attr'] .' />';
 		}
 	}
 }

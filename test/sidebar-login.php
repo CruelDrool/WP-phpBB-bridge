@@ -98,7 +98,7 @@ class SidebarLoginWidget extends WP_Widget {
 			),
 			'logged_in_links'     => array(
 				'label'           => 'Links to show (<code>Text | HREF | Capability</code>)',
-				'description'     => '<a href="http://codex.wordpress.org/Roles_and_Capabilities">Capability</a> (optional) refers to the type of user who can view the link.<br /><br />
+				'description'     => '<a href="http://codex.wordpress.org/Roles_and_Capabilities" target="_blank">Capability</a> (optional) refers to the type of user who can view the link.<br /><br />
 Available tags: 
 <code>%username%</code>,
 <code>%userid%</code>,
@@ -127,20 +127,26 @@ Available tags:
 				'default'         => '64',
 				'type'            => 'number'
 			),
-			'header-other'        => array(
-				'type'            => 'header',
-				'value'           => 'Other',
+			'avatar_style'       => array(
+				'label'           => 'Avatar CSS',
+				'default'         => 'float: right; margin: 0px 0px 5px 5px',
+				'type'            => 'text',
+				'description'     => 'Extra <a href="https://www.w3schools.com/css/" target="_blank">CSS</a> settings for the avatar.'
 			),
-			'use_stylesheet'      => array(
-				'label'           => 'Use stylesheet',
-				'default'         => 1,
-				'type'            => 'checkbox'
-			),
-			'stylesheet'          => array(
-				'label'           => 'Stylesheet',
-				'default'         => ".widget_wp_sidebarlogin, #sidebar-login {\n	overflow: hidden;\n}\n.widget_wp_sidebarlogin .avatar_container, #sidebar-login .avatar_container {\n	float:right;\n}\n.widget_wp_sidebarlogin ul {\n	list-style: none outside !important;\n}\n.widget_wp_sidebarlogin .avatar_container img, #sidebar-login .avatar_container img {\n	/*padding: 3px;\n	border: 1px solid #ddd;*/\n	-moz-border-radius: 4px;\n	-webkit-border-radius: 4px;\n	margin-right: 8px;\n	margin-top: 5px;\n}\n.widget_wp_sidebarlogin hr {\n	display: block;\n	clear: both; \n	border: 0; \n	border-top: 1px solid #999; \n	height: 1px;\n}",
-				'type'            => 'textarea'
-			),
+			// 'header-other'        => array(
+				// 'type'            => 'header',
+				// 'value'           => 'Other',
+			// ),
+			// 'use_stylesheet'      => array(
+				// 'label'           => 'Use stylesheet',
+				// 'default'         => 1,
+				// 'type'            => 'checkbox'
+			// ),
+			// 'stylesheet'          => array(
+				// 'label'           => 'Stylesheet',
+				// 'default'         => ".widget_wp_sidebarlogin, #sidebar-login {\n	overflow: hidden;\n}\n.widget_wp_sidebarlogin .avatar_container, #sidebar-login .avatar_container {\n	float:right;\n}\n.widget_wp_sidebarlogin ul {\n	list-style: none outside !important;\n}\n.widget_wp_sidebarlogin .avatar_container img, #sidebar-login .avatar_container img {\n	/*padding: 3px;\n	border: 1px solid #ddd;*/\n	-moz-border-radius: 4px;\n	-webkit-border-radius: 4px;\n	margin-right: 8px;\n	margin-top: 5px;\n}\n.widget_wp_sidebarlogin hr {\n	display: block;\n	clear: both; \n	border: 0; \n	border-top: 1px solid #999; \n	height: 1px;\n}",
+				// 'type'            => 'textarea'
+			// ),
 		);
     }
 	
@@ -164,10 +170,11 @@ Available tags:
 			'logged_in_title'         => ! empty( $instance['logged_in_title'] ) ? $instance['logged_in_title'] : $this->options['logged_in_title']['default'],
 			'logged_out_title'        => ! empty( $instance['logged_out_title'] ) ? $instance['logged_out_title'] : $this->options['logged_out_title']['default'],
 			'logged_in_links'         => ! empty( $instance['logged_in_links'] ) ? $instance['logged_in_links'] : $this->options['logged_in_links']['default'],
-			'use_stylesheet'          => isset( $instance['use_stylesheet'] ) ? $instance['use_stylesheet'] : $this->options['use_stylesheet']['default'],
-			'stylesheet'              => ! empty( $instance['stylesheet'] ) ? $instance['stylesheet'] : $this->options['stylesheet']['default'],
+			// 'use_stylesheet'          => isset( $instance['use_stylesheet'] ) ? $instance['use_stylesheet'] : $this->options['use_stylesheet']['default'],
+			// 'stylesheet'              => ! empty( $instance['stylesheet'] ) ? $instance['stylesheet'] : $this->options['stylesheet']['default'],
 			'show_avatar'             => isset( $instance['show_avatar'] ) ? $instance['show_avatar'] : $this->options['show_avatar']['default'],
 			'avatar_size'             => isset( $instance['avatar_size'] ) ? $instance['avatar_size'] : $this->options['avatar_size']['default'],
+			'avatar_style'          => ! empty( $instance['avatar_style'] ) ? $instance['avatar_style'] : $this->options['avatar_style']['default'],
 			'show_register_link'      => isset( $instance['show_register_link'] ) ? $instance['show_register_link'] : $this->options['show_register_link']['default'],
 			'show_lost_password_link' => isset( $instance['show_lost_password_link'] ) ? $instance['show_lost_password_link'] : $this->options['show_lost_password_link']['default'],
 		);
@@ -177,7 +184,7 @@ Available tags:
 		
 		
 		echo $before_widget;
-		if ($use_stylesheet) {echo '<style type="text/css">'. "\n" . $stylesheet . "\n" .'</style>';}
+		// if ($use_stylesheet) {echo '<style type="text/css">'. "\n" . $stylesheet . "\n" .'</style>';}
 
 		// if ($user_ID != '') {
 		if ( is_user_logged_in() ) {	
@@ -186,7 +193,8 @@ Available tags:
 			
 			echo $before_title . $this->replace_tags($logged_in_title). $after_title;
 			
-			if ($show_avatar) echo '<div class="avatar_container">'.get_avatar($this->user->ID, $size = $avatar_size).'</div>';
+			// if ($show_avatar) echo '<div class="avatar_container">'.get_avatar($this->user->ID, $size = $avatar_size).'</div>';
+			if ($show_avatar) echo get_avatar($this->user->ID, $avatar_size, '', '', array('extra_attr' => 'style="' . esc_attr( $avatar_style ) .'"'));
 						
 		    $raw_links = array_map( 'trim', explode( "\n", $logged_in_links ) );
 		    $links = array();
@@ -284,8 +292,20 @@ Available tags:
 				break;
 				case "checkbox" :
 					?>
-					<label for="<?php echo esc_attr( $this->get_field_id( $name ) ); ?>"><input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id( $name ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $name ) ); ?>" <?php checked( $instance[ $name ], 1 ) ?> value="1" /> <?php echo wp_kses_post( $option['label'] ) ?></label>
+					<input type="checkbox" class="checkbox" id="<?php echo esc_attr( $this->get_field_id( $name ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $name ) ); ?>" <?php checked( $instance[ $name ], 1 ) ?> value="1" />
+					<label for="<?php echo esc_attr( $this->get_field_id( $name ) ); ?>"> <?php echo wp_kses_post( $option['label'] ) ?></label>
 					<?php
+				break;
+				case "radio" :
+					echo wp_kses_post( $option['label'] ).":";
+
+					foreach ( $option['options'] as $label => $value ) {
+						$id = "$name-$value";
+						?>
+						<input type="radio" id="<?php echo esc_attr( $this->get_field_id( $id ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $name ) ); ?>" value="<?php echo esc_attr ( $value ); ?>" <?php checked( $instance[ $name ], $value ) ?> />
+						<label for="<?php echo esc_attr( $this->get_field_id( $id ) ); ?>"><?php echo wp_kses_post( $label ); ?>&nbsp;&nbsp;</label>
+						<?php
+					}
 				break;
 				case "number" :
 					?>
