@@ -1,7 +1,7 @@
 <?php
 function wpbb_admin_menu ()
 {
-	add_options_page('CruelDrool Bridge!', 'CruelDrool Bridge!', 'administrator', 'wbpp-admin', 'wpbb_display_options');
+	add_options_page('CruelDrool Bridge!', 'CruelDrool Bridge!', 'administrator', 'wpbb-admin', 'wpbb_display_options');
 }
 
 function wpbb_display_options() {
