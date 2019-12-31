@@ -539,7 +539,7 @@ function wpbb_logout() {
 			$forum_user->session_kill();
 			// $forum_user->session_begin();
 		}
-	update_user_meta(wp_get_current_user()->ID, 'session_id', '');
+	// update_user_meta(wp_get_current_user()->ID, 'session_id', '');
 }
 
 function wpbb_get_groups() {
