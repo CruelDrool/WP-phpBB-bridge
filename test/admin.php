@@ -95,7 +95,7 @@ function wpbb_display_options() {
 
 					$groups = wpbb_get_groups();
 					foreach ($groups as $id => $group) {
-						$name =(($user->lang['G_'.$group['name']]) ? $user->lang['G_'.$group['name']] : $group['name'] );
+						$name =((array_key_exists('G_'.$group['name'], $user->lang)) ? $user->lang['G_'.$group['name']] : $group['name'] );
 						echo '<select name="grp_cap['.$id.']">'."\n";
 						foreach ($available_capabilities as $capability => $rank) {
 							echo '<option value"'. $capability .'"'.(($grp_cap[$id]==$capability || (!isset($grp_cap[$id]) && $capability == 'subscriber') )? ' selected="selected"' : '' ).'>'. $capability .'</option>'."\n";
