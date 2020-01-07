@@ -74,7 +74,18 @@ global $phpbb_url, $phpEx, $user;
 		<div>
 			<div>
 				<small><a href="#commentlogin" onclick="document.getElementById('showlogin').style.display = 'none'">Click here to cancel login</a><br/></small>				
-				<?php wpbb_login_form() ?>
+				<?php
+				$prefix = "comment_";
+				$login_form_args = array(
+					'form_id'        => $prefix . 'loginform',
+					'id_username'     => $prefix . 'user_login',
+					'id_password'     => $prefix . 'user_pass',
+					'id_remember'     => $prefix . 'remember_me',
+					'id_viewonline'   => $prefix . 'view_online',
+					'id_submit'       => $prefix . 'user_submit',
+				);
+				wpbb_login_form($login_form_args) 
+				?>
 			</div>
 		</div>
 	</div>
