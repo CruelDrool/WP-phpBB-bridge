@@ -40,9 +40,9 @@ ALTER TABLE wp_usermeta RENAME TO wp_usermeta_bak;
 CREATE TABLE wp_usermeta (
 	umeta_id bigint(20) UNSIGNED NOT NULL,
 	user_id mediumint(8) UNSIGNED NOT NULL DEFAULT '0',
-	meta_key varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-	meta_value longtext COLLATE utf8mb4_unicode_ci
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+	meta_key varchar(255) COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
+	meta_value longtext COLLATE utf8mb4_unicode_520_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 
 INSERT INTO wp_usermeta (umeta_id, user_id, meta_key, meta_value) VALUES
 (1, 2, 'first_name', ''),
