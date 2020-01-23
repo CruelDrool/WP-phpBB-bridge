@@ -10,6 +10,7 @@ function wpbb_display_options() {
 	$path = trim(get_option('wpbb_path'));
 	$url = trim(get_option('wpbb_url'));
 	$grp_cap = get_option('wpbb_grp_cap', Array());
+	$avatar_size = trim(get_option('wpbb_commentsavatarsize'));
 	
 	if (isset($_POST['action']) && ($_POST['action'] == 'wpbb_update'))
 	{
@@ -18,6 +19,7 @@ function wpbb_display_options() {
 		$path = trim($_POST['wpbb_path']);
 		$url = trim($_POST['wpbb_url']);
 		(isset($_POST['grp_cap'])) ? $grp_cap = $_POST['grp_cap']:'';
+		$avatar_size = trim($_POST['wpbb_commentsavatarsize']);
 	}
 
 	if ($active == "")
@@ -34,6 +36,11 @@ function wpbb_display_options() {
 	{
 		$url = 'http://' . $_SERVER['HTTP_HOST'] . '/phpbb3';
 	}
+	
+	if ($avatar_size == "")
+	{
+		$avatar_size = "48";
+	}		
 
 	if (!file_exists($path))
 	{
@@ -44,6 +51,7 @@ function wpbb_display_options() {
 	update_option('wpbb_active', $active);
 	update_option('wpbb_path', $path);
 	update_option('wpbb_url', $url);
+	update_option('wpbb_commentsavatarsize', $avatar_size);
 
 	if ($submit)
 	{
@@ -78,6 +86,12 @@ function wpbb_display_options() {
 							echo 'checked="checked" ';
 						}
 					?>/> <?php _e('No') ?>
+				</td>
+			</tr>
+			<tr>
+				<th><label><?php _e('Comment list\'s avatar size:') ?></label></th>
+				<td>
+					<input name="wpbb_commentsavatarsize" class="small-text" type="number" id="active_yes" value="<?php echo $avatar_size ?>" />
 				</td>
 			</tr>
 			<?php if (function_exists('wpbb_get_groups') and $active == "yes") : ?>

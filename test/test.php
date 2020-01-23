@@ -3,7 +3,7 @@
 Plugin Name: CruelDrool Bridge!
 Plugin URI: https://www.nam-guild.com
 Description: Will attempt to log people into Wordpress if they are logged into a phpBB forum.
-Version: 0.1.14 Alpha
+Version: 0.1.15 Alpha
 Author: CruelDrool
 Author URI: https://www.nam-guild.com
 */

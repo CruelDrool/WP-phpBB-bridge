@@ -1,22 +1,13 @@
 <?php
 
 // Do not delete these lines
-	if (!empty($_SERVER['SCRIPT_FILENAME']) && 'comments.php' == basename($_SERVER['SCRIPT_FILENAME']))
+	if (!empty($_SERVER['SCRIPT_FILENAME']) && 'comments-phpbb.php' == basename($_SERVER['SCRIPT_FILENAME']))
 		die ('Please do not load this page directly. Thanks!');
 
-	if ( post_password_required() ) { ?>
-		<p class="nocomments">This post is password protected. Enter the password to view comments.</p>
-	<?php
-		return;
-	}
-?>
-
-
-<?php // Do not delete these lines
 
 global $phpbb_url, $phpEx, $user;
 ?>
-<!-- You can start editing here. -->
+
 
 <?php if ( have_comments() ) : ?>
 	<h3 id="comments"><?php comments_number('No Responses', 'One Response', '% Responses' );?> to &#8220;<?php the_title(); ?>&#8221;</h3>
@@ -31,7 +22,9 @@ global $phpbb_url, $phpEx, $user;
 	</div>
 
 	<ol class="commentlist">
-		<?php wpbb_list_comments(Array('avatar_size'=>64)); ?>
+		<?php 
+		$avatar_size = get_option('wpbb_commentsavatarsize');
+		wpbb_list_comments(Array('avatar_size'=>( ($avatar_size != '') ? (int) $avatar_size : 48 ) )); ?>
 	</ol>
 
 	<div class="navigation">
@@ -42,91 +35,116 @@ global $phpbb_url, $phpEx, $user;
 		}
 		?>
 	</div>
- <?php else : // this is displayed if there are no comments so far ?>
-
-	<?php if ('open' == $post->comment_status) : ?>
-		<!-- If comments are open, but there are no comments. -->
-
-	 <?php else : // comments are closed ?>
-		<!-- If comments are closed. -->
-		<p class="nocomments">Comments are closed.</p>
-
-	<?php endif; ?>
 <?php endif; ?>
 
+<?php 
 
-<?php if ('open' == $post->comment_status) : ?>
+if ('open' == $post->comment_status) {
 
-<div id="respond">
+	$post_id = get_the_ID();
+	$commenter = wp_get_current_commenter();
+	$html5 = true;
+	$html_req = ( $req ? " required='required'" : '' );
+	$comment_field = sprintf('<p class="comment-form-comment">%s</p>','<textarea id="comment" name="comment" cols="45" rows="10" maxlength="65525" required="required"></textarea>');
+		
+	$fields = array(
+		'author' => sprintf(
+			'<p class="comment-form-author">%s %s</p>',
+			sprintf(
+				'<input id="author" name="author" type="text" value="%s" size="30" maxlength="245"%s />',
+				esc_attr( $commenter['comment_author'] ),
+				$html_req
+			),
+			sprintf(
+				'<label for="author"><small>%s%s</small></label>',
+				__( 'Name' ),
+				( $req ? ' <span class="required">*</span>' : '' )
+			)
+		),
+		'email'  => sprintf(
+			'<p class="comment-form-email">%s %s</p>',
+			sprintf(
+				'<input id="email" name="email" %s value="%s" size="30" maxlength="100" aria-describedby="email-notes"%s />',
+				( $html5 ? 'type="email"' : 'type="text"' ),
+				esc_attr( $commenter['comment_author_email'] ),
+				$html_req
+			),
+			sprintf(
+				'<label for="email"><small>%s%s</small></label>',
+				__( 'Email' ),
+				( $req ? ' <span class="required">*</span>' : '' )
+			)
+		),
+		'url'    => sprintf(
+			'<p class="comment-form-url">%s %s</p>',
+			sprintf(
+				'<input id="url" name="url" %s value="%s" size="30" maxlength="200" />',
+				( $html5 ? 'type="url"' : 'type="text"' ),
+				esc_attr( $commenter['comment_author_url'] )
+			),
+			sprintf(
+				'<label for="url"><small>%s</small></label>',
+				__( 'Website' )
+			)
 
-	<h3><?php comment_form_title( 'Leave a Reply', 'Leave a Reply to %s' ); ?></h3>
+		),
+		// I want the comment field to be the last field.
+		'comment_field' => $comment_field,
+	);
+	
+		
+	$comment_form_args = array (
+		'fields' => $fields,
+		'logged_in_as'         => sprintf(
+			'<p class="logged-in-as">%s</p>',
+			sprintf(
+				__( 'Logged in as <a href="%1$s" aria-label="%2$s" style="font-weight: bold;color:#' . $user->data['user_colour'] . '">%3$s</a>. <a href="%4$s">Log out?</a>' ),
+				$phpbb_url.'/ucp.'.$phpEx,
+				esc_attr( sprintf( __( 'Logged in as %s. Edit your profile.' ), $user_identity ) ),
+				$user_identity,
+				wp_logout_url( apply_filters( 'the_permalink', get_permalink( $post_id ), $post_id ) )
+			)
+		),
+		'comment_field' => '',
+		'must_log_in'          => sprintf(
+			'<p class="must-log-in">%s</p>',
+			sprintf(
+				__( 'You must be <a href="%s" onclick="document.getElementById(\'showlogin\').style.display = \'\'">logged in</a> to post a comment.' ),
+				'#commentlogin'
+			)
+		),
+	);
+	
+	if (is_user_logged_in()) {
+		// The comment field will disappear when the user is logged in, so I'm doing the ol' switcheroo here.
+		$comment_form_args['fields']['comment_field'] = '';
+		$comment_form_args['comment_field'] = $comment_field;
+	}
 
-	<div class="cancel-comment-reply">
-		<small><?php cancel_comment_reply_link(); ?></small>
-	</div>
+	comment_form($comment_form_args);
+	
+	if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) {
+?>
 
-<?php if ( get_option('comment_registration') && !$user_ID ) : ?>
-
-	<p>You must be <a href="#commentlogin" onclick="document.getElementById('showlogin').style.display = ''">logged in</a> to post a comment.</p>
-
-	<div id="showlogin" style="display: none">
-		<h3><?php echo $user->lang['LOGIN'] ?></h3>
-		<div>
-			<div>
-				<small><a href="#commentlogin" onclick="document.getElementById('showlogin').style.display = 'none'">Click here to cancel login</a><br/></small>				
-				<?php
-				$prefix = "comment_";
-				$login_form_args = array(
-					'form_id'        => $prefix . 'loginform',
-					'id_username'     => $prefix . 'user_login',
-					'id_password'     => $prefix . 'user_pass',
-					'id_remember'     => $prefix . 'remember_me',
-					'id_viewonline'   => $prefix . 'view_online',
-					'id_submit'       => $prefix . 'user_submit',
-				);
-				wpbb_login_form($login_form_args) 
-				?>
-			</div>
+		<a name="commentlogin"><a/>
+		<div id="showlogin" style="display: none">
+			<h3><?php echo $user->lang['LOGIN'] ?></h3>
+			<small><a href="#commentlogin" onclick="document.getElementById('showlogin').style.display = 'none'">Click here to cancel login</a><br/></small>				
+			<?php
+			$prefix = "comment_";
+			$login_form_args = array(
+				'form_id'        => $prefix . 'loginform',
+				'id_username'     => $prefix . 'user_login',
+				'id_password'     => $prefix . 'user_pass',
+				'id_remember'     => $prefix . 'remember_me',
+				'id_viewonline'   => $prefix . 'view_online',
+				'id_submit'       => $prefix . 'user_submit',
+				'redirect'        => apply_filters( 'the_permalink', get_permalink( $post_id ), $post_id ),
+			);
+			wpbb_login_form($login_form_args)
+			?>
 		</div>
-	</div>
-	<div id="commentlogin"></div>
-<?php else : ?>
-	<div id="writecomment">
-		<div>
-			<div>
-				<form action="<?php echo get_option('siteurl'); ?>/wp-comments-post.php" method="post" id="commentform">
-
-				<?php if ( $user_ID ) : ?>
-
-				<p>Logged in as <a href="<?php echo $phpbb_url.'/ucp.'.$phpEx ?>" style="font-weight: bold;color:#<?php echo $user->data['user_colour']; ?>"><?php echo $user_identity; ?></a>. <a href="<?php echo wp_logout_url(get_permalink()); ?>" title="Log out of this account">Log out &raquo;</a></p>
-
-				<?php else : ?>
-
-				<p><input type="text" name="author" id="author" value="<?php echo $comment_author; ?>" size="22" tabindex="1" <?php if ($req) echo "aria-required='true'"; ?> />
-				<label for="author"><small>Name <?php if ($req) echo "(required)"; ?></small></label></p>
-
-				<p><input type="text" name="email" id="email" value="<?php echo $comment_author_email; ?>" size="22" tabindex="2" <?php if ($req) echo "aria-required='true'"; ?> />
-				<label for="email"><small>Mail (will not be published) <?php if ($req) echo "(required)"; ?></small></label></p>
-
-				<p><input type="text" name="url" id="url" value="<?php echo $comment_author_url; ?>" size="22" tabindex="3" />
-				<label for="url"><small>Website</small></label></p>
-
-				<?php endif; ?>
-
-				<!--<p><small><strong>XHTML:</strong> You can use these tags: <code><?php echo allowed_tags(); ?></code></small></p>-->
-
-				<p><textarea name="comment" id="comment" cols="100%" rows="10" tabindex="4"></textarea></p>
-
-				<p><input name="submit" type="submit" id="submit" tabindex="5" value="Submit Comment" />
-				<?php comment_id_fields(); ?>
-				</p>
-				<?php do_action('comment_form', $post->ID); ?>
-
-				</form>
-			</div>
-		</div>
-	</div>
-<?php endif; // If registration required and not logged in ?>
-</div>
-
-<?php endif; // if you delete this the sky will fall on your head ?>
+<?php 
+	}
+} 
+?>
