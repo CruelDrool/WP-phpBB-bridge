@@ -2,8 +2,11 @@
 
 // Do not delete these lines
 	if (!empty($_SERVER['SCRIPT_FILENAME']) && 'comments-phpbb.php' == basename($_SERVER['SCRIPT_FILENAME']))
-		die ('Please do not load this page directly. Thanks!');
+		die;
 
+if ( post_password_required() ) {
+	return;
+}
 
 global $phpbb_url, $phpEx, $user;
 ?>
