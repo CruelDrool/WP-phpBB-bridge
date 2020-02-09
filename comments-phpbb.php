@@ -13,7 +13,8 @@ global $phpbb_url, $phpEx, $user;
 
 
 <?php if ( have_comments() ) : ?>
-	<h3 id="comments"><?php comments_number('No Responses', 'One Response', '% Responses' );?> to &#8220;<?php the_title(); ?>&#8221;</h3>
+<div id="comments">
+	<h3><?php comments_number('No Responses', 'One Response', '% Responses' );?> to &#8220;<?php the_title(); ?>&#8221;</h3>
 
 	<div class="navigation">
 		<?php 
@@ -38,6 +39,7 @@ global $phpbb_url, $phpEx, $user;
 		}
 		?>
 	</div>
+</div>
 <?php endif; ?>
 
 <?php 
