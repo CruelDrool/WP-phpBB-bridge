@@ -131,7 +131,8 @@ if ('open' == $post->comment_status) {
 	if ( get_option( 'comment_registration' ) && ! is_user_logged_in() ) {
 ?>
 
-		<a name="commentlogin"><a/>
+		<a name="commentlogin"></a>
+		<div>
 		<div id="showlogin" style="display: none">
 			<h3><?php echo $user->lang['LOGIN'] ?></h3>
 			<small><a href="#commentlogin" onclick="document.getElementById('showlogin').style.display = 'none'">Click here to cancel login</a><br/></small>				
@@ -148,6 +149,7 @@ if ('open' == $post->comment_status) {
 			);
 			wpbb_login_form($login_form_args)
 			?>
+		</div>
 		</div>
 <?php 
 	}
