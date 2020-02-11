@@ -55,8 +55,8 @@ function wpbb_login_form( $args = array() ) {
 			<input type="hidden" name="' . esc_attr( $args['name_redirect'] ) . '" value="' . esc_url( $args['redirect'] ) . '" />
 		</form>
 		<ul class="login-links">
-		' . ( $args['lost_pass_link'] ? '<li><a href="'. $phpbb_url.'/ucp.'.$phpEx .'?mode=sendpassword">'.esc_attr( $args['label_lost_pass'] ).'</a></li>' : '' ) . '
-		' . ( ( $args['user_reg_link'] and $config['require_activation'] != USER_ACTIVATION_DISABLE ) ? '<li><a href="'. $phpbb_url.'/ucp.'.$phpEx .'?mode=register">'.esc_attr( $args['label_register'] ).'</a></li>' : '' ) . '
+		' . ( $args['lost_pass_link'] ? '<li><a href="'. $phpbb_url.'/ucp.'.$phpEx .'?mode=sendpassword" rel="nofollow">'.esc_attr( $args['label_lost_pass'] ).'</a></li>' : '' ) . '
+		' . ( ( $args['user_reg_link'] and $config['require_activation'] != USER_ACTIVATION_DISABLE ) ? '<li><a href="'. $phpbb_url.'/ucp.'.$phpEx .'?mode=register" rel="nofollow">'.esc_attr( $args['label_register'] ).'</a></li>' : '' ) . '
 		</ul>';
 
 	if ( $args['echo'] ) {
