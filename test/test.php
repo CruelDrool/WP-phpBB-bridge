@@ -24,7 +24,8 @@ if ( get_option('wpbb_active') == "yes" ) {
 	add_action('wp_footer','garbage_collection');
 	add_action('admin_footer','garbage_collection');
 	add_action('wp_logout', 'wpbb_logout',1);
-	add_filter('pre_get_avatar', 'wpbb_get_avatar', 1, 3);
+	add_filter('pre_get_avatar', 'wpbb_pre_get_avatar', 1, 3);
+	add_filter('pre_get_avatar_data', 'wpbb_pre_get_avatar_data', 1, 2);
 }
 
 ?>

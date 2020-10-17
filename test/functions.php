@@ -477,7 +477,7 @@ function wpbb_is_groupmember($userid,$groupid)
 	}
 }
 
-function wpbb_get_avatar($null, $id_or_email, $args){
+function wpbb_pre_get_avatar($null, $id_or_email, $args){
 	if (is_object($id_or_email)) {
 		if (isset($id_or_email->user_id)) {
 			$id = $id_or_email->user_id;
@@ -496,6 +496,29 @@ function wpbb_get_avatar($null, $id_or_email, $args){
 			return '<img alt="'.$args['alt'].'" src="'.$url.'" class="avatar avatar-'. (int) $args['size'] . ' photo" width="' . (int) $args['size'] . '" '. $args['extra_attr'] .' />';
 		}
 	}
+}
+
+function wpbb_pre_get_avatar_data($args, $id_or_email){
+	if (is_object($id_or_email)) {
+		if (isset($id_or_email->user_id)) {
+			$id = $id_or_email->user_id;
+		}
+		elseif (isset($id_or_email->ID)) {
+			$id = $id_or_email->ID;
+		}
+	}
+	elseif (is_numeric($id_or_email)) {
+		$id = $id_or_email;
+	}
+	
+	if (isset($id)) {
+		$url = wpbb_get_avatar_url($id);
+		if (!empty($url)) {
+			$args['url'] = $url;
+		}
+	}
+	
+	return $args;
 }
 
 function wpbb_get_avatar_url($userid) 
