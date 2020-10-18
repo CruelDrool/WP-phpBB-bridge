@@ -491,9 +491,10 @@ function wpbb_pre_get_avatar($null, $id_or_email, $args){
 	}
 	
 	if (isset($id)) {
-		$url = wpbb_get_avatar_url($id);
-		if (!empty($url)) {
-			return '<img alt="'.$args['alt'].'" src="'.$url.'" class="avatar avatar-'. (int) $args['size'] . ' photo" width="' . (int) $args['size'] . '" '. $args['extra_attr'] .' />';
+		$data = wpbb_get_avatar_data($id);
+		if (isset($data['url'])) {
+			$height = round($args['size'] / $data['width'] * $data['height']);
+			return '<img alt="'.$args['alt'].'" src="'.$data['url'].'" class="avatar avatar-'. (int) $args['size'] . ' photo" width="' . (int) $args['size'] . '" height="' . $height . '" '. $args['extra_attr'] .' />';
 		}
 	}
 }
@@ -512,46 +513,50 @@ function wpbb_pre_get_avatar_data($args, $id_or_email){
 	}
 	
 	if (isset($id)) {
-		$url = wpbb_get_avatar_url($id);
-		if (!empty($url)) {
-			$args['url'] = $url;
-		}
+		$data = wpbb_get_avatar_data($id);
+		$args = wp_parse_args($data, $args);
 	}
 	
 	return $args;
 }
 
-function wpbb_get_avatar_url($userid) 
+function wpbb_get_avatar_data($userid) 
 {
 	global $config, $phpbb_url, $db, $phpEx;
-
+	
+	$data = [];
+	
 	if ($userid > 1) {
-		$sql = 'SELECT user_avatar, user_avatar_type
+		$sql = 'SELECT user_avatar, user_avatar_type, user_avatar_width, user_avatar_height
 				FROM ' . USERS_TABLE . '
 				WHERE user_id = ' . $userid;
 		$result = $db->sql_query($sql);
 		$row = $db->sql_fetchrow($result);
-		$avatar = $row['user_avatar'];
-		$avatar_type = $row['user_avatar_type'];
 		$db->sql_freeresult($result);
 
-			switch ($avatar_type)
+			switch ($row['user_avatar_type'])
 			{
 				case 1:
-					return $phpbb_url . '/download/file.'.$phpEx.'?avatar=' . $avatar;
+					$url = $phpbb_url . '/download/file.'.$phpEx.'?avatar=' . $row['user_avatar'];
 					break;
 				case 2:
-					return $avatar;
+					$url = $row['user_avatar'];
 					break;
 				case 3:
-					return $phpbb_url . "/" . $config['avatar_gallery_path'] . '/' . $avatar;
+					$url = $phpbb_url . "/" . $config['avatar_gallery_path'] . '/' . $row['user_avatar'];
 					break;
 				default:
-					return '';
 					break;
 			}
+			
+		if (isset($url)) {
+			$data['size'] = $data['width'] = $row['user_avatar_width'];
+			$data['height'] = $row['user_avatar_height'];
+			$data['url'] = $url;
+			$data['found_avatar'] = true;
+		}
 	}
-	return '';
+	return $data;
 }
 
 function wpbb_logout() {
