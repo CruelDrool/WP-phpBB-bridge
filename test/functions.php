@@ -531,9 +531,8 @@ function wpbb_get_avatar_data($userid)
 				FROM ' . USERS_TABLE . '
 				WHERE user_id = ' . $userid;
 		$result = $db->sql_query($sql);
-		$row = $db->sql_fetchrow($result);
-		$db->sql_freeresult($result);
-
+		if ($result->num_rows) {
+			$row = $db->sql_fetchrow($result);	
 			switch ($row['user_avatar_type'])
 			{
 				case 1:
@@ -548,13 +547,15 @@ function wpbb_get_avatar_data($userid)
 				default:
 					break;
 			}
-			
-		if (isset($url)) {
-			$data['size'] = $data['width'] = $row['user_avatar_width'];
-			$data['height'] = $row['user_avatar_height'];
-			$data['url'] = $url;
-			$data['found_avatar'] = true;
+				
+			if (isset($url)) {
+				$data['size'] = $data['width'] = $row['user_avatar_width'];
+				$data['height'] = $row['user_avatar_height'];
+				$data['url'] = $url;
+				$data['found_avatar'] = true;
+			}
 		}
+		$db->sql_freeresult($result);
 	}
 	return $data;
 }

@@ -3,33 +3,13 @@ function wpbb_init() {
 	global $phpbb_root_path, $phpEx, $auth, $user, $db, $config, $cache, $template, $forum_user, $phpbb_url;
 	// global $phpbb_root_path, $phpEx, $user, $db, $config, $cache, $template;
 
+	define('STRIP', false);
 	define('IN_PHPBB', true);
 	$phpbb_path = get_option('wpbb_path');
 	$phpbb_url = trim(get_option('wpbb_url'),"/");
-	$phpbb_root_path = (defined('PHPBB_ROOT_PATH')) ? PHPBB_ROOT_PATH : $phpbb_path.'/';
+	$phpbb_root_path = $phpbb_path.'/';
 	$phpEx = substr(strrchr(__FILE__, '.'), 1);
 	
-	// Register globals and magic quotes have been dropped in PHP 5.4
-	if (version_compare(PHP_VERSION, '5.4.0-dev', '>='))
-	{
-		/**
-		* @ignore
-		*/
-		define('STRIP', false);
-	}
-	else
-	{
-		@set_magic_quotes_runtime(0);
-
-		// Be paranoid with passed vars
-		if (@ini_get('register_globals') == '1' || strtolower(@ini_get('register_globals')) == 'on' || !function_exists('ini_get'))
-		{
-			deregister_globals();
-		}
-
-		define('STRIP', (get_magic_quotes_gpc()) ? true : false);
-	}
-
 	// Include files
 	require($phpbb_root_path . 'config.' . $phpEx);
 	require($phpbb_root_path . 'includes/acm/acm_' . $acm_type . '.' . $phpEx);
@@ -49,7 +29,7 @@ function wpbb_init() {
 	$db			= new $sql_db();
 	$forum_user = $user;
 	// Connect to DB
-	$db->sql_connect($dbhost, $dbuser, $dbpasswd, $dbname, $dbport, false, defined('PHPBB_DB_NEW_LINK') ? PHPBB_DB_NEW_LINK : false);
+	$db->sql_connect($dbhost, $dbuser, $dbpasswd, $dbname, $dbport, false, false);
 
 	// We do not need this any longer, unset for safety purposes
 	unset($dbpasswd);

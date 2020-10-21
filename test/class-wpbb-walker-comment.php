@@ -80,7 +80,7 @@ class Wpbb_Walker_Comment extends Walker {
 	 *  2.2
 	 *
 	 */
-	function display_element( $element, &$children_elements, $max_depth, $depth=0, $args, &$output ) {
+	function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
 
 		if ( !$element )
 			return;
