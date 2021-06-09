@@ -66,20 +66,21 @@ function wpbb_login_form( $args = array() ) {
 	}
 }
 
-function wpbb_current_url( $url = '' ) {
-	$pageURL  = force_ssl_admin() ? 'https://' : 'http://';
-	$pageURL .= esc_attr( $_SERVER['HTTP_HOST'] );
-	$pageURL .= esc_attr( $_SERVER['REQUEST_URI'] );
+function wpbb_current_url() {
+	// $pageURL  = force_ssl_admin() ? 'https://' : 'http://';
+	// $pageURL .= esc_attr( $_SERVER['HTTP_HOST'] );
+	// $pageURL .= esc_attr( $_SERVER['REQUEST_URI'] );
 
-	if ( $url != "nologout" ) {
-		if ( ! strpos( $pageURL, '_login=' ) ) {
-			$rand_string = md5( uniqid( rand(), true ) );
-			$rand_string = substr( $rand_string, 0, 10 );
-			$pageURL = add_query_arg( '_login', $rand_string, $pageURL );
-		}
-	}
+	// if ( $url != "nologout" ) {
+		// if ( ! strpos( $pageURL, '_login=' ) ) {
+			// $rand_string = md5( uniqid( rand(), true ) );
+			// $rand_string = substr( $rand_string, 0, 10 );
+			// $pageURL = add_query_arg( '_login', $rand_string, $pageURL );
+		// }
+	// }
 
-	return esc_url_raw( $pageURL );
+	// return esc_url_raw( $pageURL );
+	return esc_url(set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ));
 }
 
 function wpbb_get_comment_reply_link($args = array(), $comment = null, $post = null) {
@@ -423,12 +424,20 @@ function wpbb_get_profile_link($comment)
 				$comment->comment_author_url = $userdata->user_url;
 				wp_update_comment((array)$comment);
 			}
-			$user_colour=wpbb_get_usercolour($user_id);
-			if ($user_colour){
-				$profile_link = '<a href="'.$phpbb_url . '/memberlist.'.$phpEx.'?mode=viewprofile&amp;u='.$user_id.'" style="color:#'.$user_colour.'">'.$comment->comment_author.'</a>';
-			}
-			else {
-				$profile_link = '<a href="'.$phpbb_url . '/memberlist.'.$phpEx.'?mode=viewprofile&amp;u='.$user_id.'">'.$comment->comment_author.'</a>';
+			$user_colour = wpbb_get_usercolour($user_id);
+			$is_logged_in = is_user_logged_in();
+			$comment_author = $userdata->display_name;
+			
+			if ($is_logged_in && $user_colour) {
+				// $profile_link = '<a href="'.$phpbb_url . '/memberlist.'.$phpEx.'?mode=viewprofile&amp;u='.$user_id.'" style="color:#'.$user_colour.'">'.$comment_author.'</a>';
+				$profile_link = sprintf('<a href="%s/memberlist.%s?mode=viewprofile&amp;u=%s" style="color: #%s">%s</a>', $phpbb_url, $phpEx, $user_id, $user_colour, $comment_author );
+			} else if ($is_logged_in && !$user_colour) {
+				// $profile_link = '<a href="'.$phpbb_url . '/memberlist.'.$phpEx.'?mode=viewprofile&amp;u='.$user_id.'">'.$comment_author.'</a>';
+				$profile_link = sprintf('<a href="%s/memberlist.%s?mode=viewprofile&amp;u=%s">%s</a>', $phpbb_url, $phpEx, $user_id, $comment_author );
+			} else if (!$is_logged_in && $user_colour) {
+				$profile_link = sprintf('<span style="color:#%s">%s</span>', $user_colour, $comment_author);
+			} else {
+				$profile_link = $comment_author;
 			}
 		}
 	}
@@ -436,6 +445,7 @@ function wpbb_get_profile_link($comment)
 	{	
 		$profile_link = $comment->comment_author;
 	}
+
 	return $profile_link;
 }
 
@@ -446,7 +456,7 @@ function wpbb_get_usercolour($userid)
 			$sql = 'SELECT user_colour
 					FROM ' . USERS_TABLE . '
 					WHERE user_id = ' . $userid;
-			$result = $db->sql_query($sql);
+			$result = $db->sql_query($sql, 300);
 			$row = $db->sql_fetchrow($result);
 			$user_colour = $row['user_colour'];
 			$db->sql_freeresult($result);
@@ -463,7 +473,7 @@ function wpbb_is_groupmember($userid,$groupid)
 	$sql = 'SELECT group_id
 			FROM ' . USER_GROUP_TABLE . '
 			WHERE group_id = '.$groupid.' and user_id = ' . $userid;
-	$result = $db->sql_query($sql);
+	$result = $db->sql_query($sql, 60);
 	$row = $db->sql_fetchrow($result);
 	$db->sql_freeresult($result);
 	
@@ -530,9 +540,10 @@ function wpbb_get_avatar_data($userid)
 		$sql = 'SELECT user_avatar, user_avatar_type, user_avatar_width, user_avatar_height
 				FROM ' . USERS_TABLE . '
 				WHERE user_id = ' . $userid;
-		$result = $db->sql_query($sql);
-		if ($result->num_rows) {
-			$row = $db->sql_fetchrow($result);	
+		$result = $db->sql_query($sql, 300);
+		$row = $db->sql_fetchrow($result);
+		
+		if ($row) {
 			switch ($row['user_avatar_type'])
 			{
 				case 1:
@@ -575,7 +586,7 @@ function wpbb_get_groups() {
 	global $db;
 	$sql = 'SELECT group_id, group_type, group_name, group_colour
 			FROM ' . GROUPS_TABLE;
-	$result = $db->sql_query($sql);
+	$result = $db->sql_query($sql, 300);
 	while ($row = $db->sql_fetchrow($result))
 	{
 		if ($row['group_name'] != 'BOTS' && $row['group_name'] != 'GUESTS' )

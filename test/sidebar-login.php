@@ -52,7 +52,7 @@ class SidebarLoginWidget extends WP_Widget {
 				wpbb_get_privmsg(),
 				$phpbb_url.'/ucp.'.$phpEx.'?i=pm&amp;folder=inbox',
 				$user->lang['LOGOUT'],
-				wp_logout_url( $this->current_url( 'nologout' ) ),
+				wp_logout_url( $this->current_url() ),
 				$user->lang['ACP'],
 				$phpbb_url.'/adm/index.php?sid='.$user->session_id,
 			),
