@@ -435,9 +435,9 @@ function wpbb_get_profile_link($comment)
 				// $profile_link = '<a href="'.$phpbb_url . '/memberlist.'.$phpEx.'?mode=viewprofile&amp;u='.$user_id.'">'.$comment_author.'</a>';
 				$profile_link = sprintf('<a href="%s/memberlist.%s?mode=viewprofile&amp;u=%s">%s</a>', $phpbb_url, $phpEx, $user_id, $comment_author );
 			} else if (!$is_logged_in && $user_colour) {
-				$profile_link = sprintf('<span style="color:#%s">%s</span>', $user_colour, $comment_author);
+				$profile_link = sprintf('<a style="color:#%s">%s</a>', $user_colour, $comment_author);
 			} else {
-				$profile_link = $comment_author;
+				$profile_link = sprintf('<a>%s</a>', $comment_author);
 			}
 		}
 	}
