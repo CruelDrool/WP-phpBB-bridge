@@ -1,17 +1,34 @@
 <?php
 /*
 Plugin Name: CruelDrool Bridge!
-Plugin URI: https://www.nam-guild.com
+Plugin URI: https://github.com/CruelDrool/WP-phpBB-bridge
 Description: Will attempt to log people into Wordpress if they are logged into a phpBB forum.
-Version: 0.1.20 Alpha
+Version: 0.1.21 Alpha
 Author: CruelDrool
-Author URI: https://www.nam-guild.com
+Author URI: https://github.com/CruelDrool
 */
 
 $plugin_path = dirname(__FILE__);
 include_once($plugin_path . '/admin.php');
 
-add_action('admin_menu', 'wpbb_admin_menu');
+$parent_slug = 'options-general.php';
+$menu_slug = 'wpbb-admin';
+
+add_action('admin_menu', function(){
+	global $parent_slug, $menu_slug;
+	add_submenu_page($parent_slug , 'CruelDrool Bridge Settings!', 'CruelDrool Bridge!', 'administrator', $menu_slug, 'wpbb_display_options');
+});
+
+// plugin_basename() not playing nicely with Windows Junctions
+add_filter( 'plugin_action_links_' . implode('/', [basename($plugin_path),basename(__FILE__)]), function( $actions ) {
+	global $parent_slug, $menu_slug;
+	$path = sprintf('%s?%s',$parent_slug, $menu_slug );
+	$links = [
+		sprintf('<a href="%s">%s</a>',admin_url( $path ), __('Settings') ),
+	];
+	$actions = array_merge( $actions, $links );
+	return $actions;
+});
 
 if ( get_option('wpbb_active') == "yes" ) {
 	include_once($plugin_path . '/functions.php');
@@ -25,8 +42,6 @@ if ( get_option('wpbb_active') == "yes" ) {
 	add_action('wp_logout', 'wpbb_logout',1);
 	add_filter('pre_get_avatar', 'wpbb_pre_get_avatar', 1, 3);
 	add_filter('pre_get_avatar_data', 'wpbb_pre_get_avatar_data', 1, 2);
-	
-	
 	
 	add_filter('login_url',
 	function($login_url, $redirect, $force_reauth){
@@ -90,8 +105,5 @@ if ( get_option('wpbb_active') == "yes" ) {
 		return $url;
 	},10, 3);
 }
-
-
-
 
 ?>

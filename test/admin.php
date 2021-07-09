@@ -1,16 +1,10 @@
 <?php
-function wpbb_admin_menu ()
-{
-	add_options_page('CruelDrool Bridge!', 'CruelDrool Bridge!', 'administrator', 'wpbb-admin', 'wpbb_display_options');
-}
-
 function wpbb_display_options() {
 	$submit = false;
 	$active = trim(get_option('wpbb_active'));
 	$path = trim(get_option('wpbb_path'));
 	$url = trim(get_option('wpbb_url'));
 	$grp_cap = get_option('wpbb_grp_cap', Array());
-	$avatar_size = trim(get_option('wpbb_commentsavatarsize'));
 	
 	if (isset($_POST['action']) && ($_POST['action'] == 'wpbb_update'))
 	{
@@ -19,7 +13,6 @@ function wpbb_display_options() {
 		$path = trim($_POST['wpbb_path']);
 		$url = trim($_POST['wpbb_url']);
 		(isset($_POST['grp_cap'])) ? $grp_cap = $_POST['grp_cap']:'';
-		$avatar_size = trim($_POST['wpbb_commentsavatarsize']);
 	}
 
 	if ($active == "")
@@ -37,10 +30,6 @@ function wpbb_display_options() {
 		$url = 'http://' . $_SERVER['HTTP_HOST'] . '/phpbb3';
 	}
 	
-	if ($avatar_size == "")
-	{
-		$avatar_size = "48";
-	}		
 
 	if (!file_exists($path))
 	{
@@ -51,7 +40,6 @@ function wpbb_display_options() {
 	update_option('wpbb_active', $active);
 	update_option('wpbb_path', $path);
 	update_option('wpbb_url', $url);
-	update_option('wpbb_commentsavatarsize', $avatar_size);
 
 	if ($submit)
 	{
@@ -88,12 +76,6 @@ function wpbb_display_options() {
 					?>/> <?php _e('No') ?>
 				</td>
 			</tr>
-			<tr>
-				<th><label><?php _e('Comment list\'s avatar size:') ?></label></th>
-				<td>
-					<input name="wpbb_commentsavatarsize" class="small-text" type="number" id="active_yes" value="<?php echo $avatar_size ?>" />
-				</td>
-			</tr>
 			<?php if (function_exists('wpbb_get_groups') and $active == "yes") : ?>
 			<tr>
 				<th>
@@ -103,19 +85,19 @@ function wpbb_display_options() {
 				</th>
 				<td>
 				<?php
-					global $user;
+					global $forum_user;
 
 					$available_capabilities = wpbb_get_available_capabilities();
 
 					$groups = wpbb_get_groups();
 					foreach ($groups as $id => $group) {
-						$name =((array_key_exists('G_'.$group['name'], $user->lang)) ? $user->lang['G_'.$group['name']] : $group['name'] );
+						$name = $forum_user->lang['G_'.$group['name']] ?? $group['name'] ;
 						echo '<select name="grp_cap['.$id.']">'."\n";
 						foreach ($available_capabilities as $capability => $rank) {
-							echo '<option value"'. $capability .'"'.(($grp_cap[$id]==$capability || (!isset($grp_cap[$id]) && $capability == 'subscriber') )? ' selected="selected"' : '' ).'>'. $capability .'</option>'."\n";
+							echo '<option value"'. $capability .'"'.($grp_cap[$id]==$capability || (!isset($grp_cap[$id]) && $capability == 'subscriber') ? ' selected="selected"' : '' ).'>'. $capability .'</option>'."\n";
 						}
 						echo '</select>'."\n";
-						echo '<label'.( ($group['colour']) ? ' style="color:#'.$group['colour'].'"' : '' ) .'>'.$name.'</label><br/>';
+						echo '<label'.( $group['colour'] ? ' style="color:#'.$group['colour'].'"' : '' ) .'>'.$name.'</label><br/>';
 					}
 				?>
 				</td>
