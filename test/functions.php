@@ -487,7 +487,7 @@ function wpbb_is_groupmember($userid,$groupid)
 	}
 }
 
-function wpbb_pre_get_avatar($null, $id_or_email, $args){
+function wpbb_pre_get_avatar($avatar, $id_or_email, $args){
 	if (is_object($id_or_email)) {
 		if (isset($id_or_email->user_id)) {
 			$id = $id_or_email->user_id;
@@ -502,11 +502,42 @@ function wpbb_pre_get_avatar($null, $id_or_email, $args){
 	
 	if (isset($id)) {
 		$data = wpbb_get_avatar_data($id);
-		if (isset($data['url'])) {
+		if ($data['found_avatar']) {
 			$height = round($args['size'] / $data['width'] * $data['height']);
-			return '<img alt="'.$args['alt'].'" src="'.$data['url'].'" class="avatar avatar-'. (int) $args['size'] . ' photo" width="' . (int) $args['size'] . '" height="' . $height . '" '. $args['extra_attr'] .' />';
+			
+			$class = ['avatar', 'avatar-' . (int) $args['size'], 'photo' ];
+		 		 
+			if ( $args['class'] ) {
+				if ( is_array( $args['class'] ) ) {
+					$class = array_merge( $class, $args['class'] );
+				} else {
+					$class[] = $args['class'];
+				}
+			}
+			
+			$extra_attr = $args['extra_attr'];
+			$loading    = $args['loading'];
+		 
+			if ( in_array( $loading, [ 'lazy', 'eager' ], true ) && ! preg_match( '/\bloading\s*=/', $extra_attr ) ) {
+				if ( ! empty( $extra_attr ) ) {
+					$extra_attr .= ' ';
+				}
+		 
+				$extra_attr .= sprintf('loading="%s"', $loading);
+			}
+			
+			$avatar = sprintf(
+				'<img alt="%s" src="%s" class="%s" height="%d" width="%d" %s/>',
+				esc_attr( $args['alt'] ),
+				esc_url( $data['url'] ),
+				esc_attr( implode( ' ', $class ) ),
+				$height,
+				(int) $args['width'],
+				$extra_attr
+			);			
 		}
 	}
+	return $avatar;
 }
 
 function wpbb_pre_get_avatar_data($args, $id_or_email){
@@ -534,7 +565,7 @@ function wpbb_get_avatar_data($userid)
 {
 	global $config, $phpbb_url, $db, $phpEx;
 	
-	$data = [];
+	$data = ['found_avatar' => false];
 	
 	if ($userid > 1) {
 		$sql = 'SELECT user_avatar, user_avatar_type, user_avatar_width, user_avatar_height
