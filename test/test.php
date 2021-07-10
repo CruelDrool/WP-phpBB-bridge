@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: CruelDrool Bridge!
+Plugin Name: WordPress-phpBB bridge
 Plugin URI: https://github.com/CruelDrool/WP-phpBB-bridge
 Description: Will attempt to log people into Wordpress if they are logged into a phpBB forum.
 Version: 0.1.21 Alpha
@@ -16,15 +16,16 @@ $menu_slug = 'wpbb-admin';
 
 add_action('admin_menu', function(){
 	global $parent_slug, $menu_slug;
-	add_submenu_page($parent_slug , 'CruelDrool Bridge Settings!', 'CruelDrool Bridge!', 'administrator', $menu_slug, 'wpbb_display_options');
+	$plugin_data = get_plugin_data( __FILE__ );
+	add_submenu_page($parent_slug , sprintf('%s %s', $plugin_data['Name'], __('Settings')), $plugin_data['Name'], 'administrator', $menu_slug, function() { wpbb_display_options(get_plugin_data( __FILE__ ));});
 });
 
 // plugin_basename() not playing nicely with Windows Junctions
 add_filter( 'plugin_action_links_' . implode('/', [basename($plugin_path),basename(__FILE__)]), function( $actions ) {
 	global $parent_slug, $menu_slug;
-	$path = sprintf('%s?%s',$parent_slug, $menu_slug );
+	$path = sprintf('%s?page=%s', $parent_slug, $menu_slug );
 	$links = [
-		sprintf('<a href="%s">%s</a>',admin_url( $path ), __('Settings') ),
+		sprintf('<a href="%s">%s</a>', admin_url( $path ), __('Settings') ),
 	];
 	$actions = array_merge( $actions, $links );
 	return $actions;

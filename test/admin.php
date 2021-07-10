@@ -1,5 +1,5 @@
 <?php
-function wpbb_display_options() {
+function wpbb_display_options($plugin_data) {
 	$submit = false;
 	$active = trim(get_option('wpbb_active'));
 	$path = trim(get_option('wpbb_path'));
@@ -48,7 +48,7 @@ function wpbb_display_options() {
 
 ?><div class="wrap">
 	<form method="post" action="">
-		<h2>CruelDrool Bridge!</h2>
+		<h2><?php printf('%s %s', $plugin_data['Name'], __('Settings')); ?></h2>
 		<table class="form-table">
 			<tr>
 				<th><label><?php _e('Path to phpBB:') ?></label></th>
