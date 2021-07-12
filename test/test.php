@@ -8,20 +8,23 @@ Author: CruelDrool
 Author URI: https://github.com/CruelDrool
 */
 
-$plugin_path = dirname(__FILE__);
+// Workaround for the issue with Windows Junctions and plugin_basename().
+$file = implode('/', [WP_PLUGIN_DIR,basename(dirname(__FILE__)),basename(__FILE__)]);
+
+$plugin_path = dirname($file);
+
 include_once($plugin_path . '/admin.php');
 
 $parent_slug = 'options-general.php';
 $menu_slug = 'wpbb-admin';
 
 add_action('admin_menu', function(){
-	global $parent_slug, $menu_slug;
-	$plugin_data = get_plugin_data( __FILE__ );
+	global $parent_slug, $menu_slug, $file;
+	$plugin_data = get_plugin_data( $file );
 	add_submenu_page($parent_slug , sprintf('%s %s', $plugin_data['Name'], __('Settings')), $plugin_data['Name'], 'administrator', $menu_slug, function() { wpbb_display_options(get_plugin_data( __FILE__ ));});
 });
 
-// plugin_basename() not playing nicely with Windows Junctions
-add_filter( 'plugin_action_links_' . implode('/', [basename($plugin_path),basename(__FILE__)]), function( $actions ) {
+add_filter( 'plugin_action_links_' . plugin_basename($file), function( $actions ) {
 	global $parent_slug, $menu_slug;
 	$path = sprintf('%s?page=%s', $parent_slug, $menu_slug );
 	$links = [
