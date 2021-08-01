@@ -77,8 +77,11 @@ if ( get_option('wpbb_active') == "yes" ) {
 
 	
 	add_action('login_form_login', function(){
-		wp_redirect(wp_login_url());
-		exit();
+		$reauth = empty( $_REQUEST['reauth'] ) ? false : true;
+		if (!$reauth) {
+			wp_redirect(wp_login_url());
+			exit();
+		}
 	});
 
 	add_action('login_form_register', function(){

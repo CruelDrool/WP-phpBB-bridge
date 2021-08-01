@@ -73,33 +73,3 @@ ALTER TABLE wp_usermeta MODIFY umeta_id bigint(20) UNSIGNED NOT NULL AUTO_INCREM
 
 ALTER TABLE wp_usermeta ADD CONSTRAINT wp_usermeta_fk FOREIGN KEY(user_id) REFERENCES phpbb_users(user_id) ON DELETE CASCADE;
 ```
-7. Change a few PHP-files in phpBB, so that it allows redirect back to Wordpress after logging in:
-```PHP
-// File: /includes/functions.php
-
-// *** Find ***
-function redirect($url, $return = false, $disable_cd_check = false)
-
-// --- Replace with ---
-function redirect($url, $return = false, $disable_cd_check = true)
-
-// *** Find ***
-function meta_refresh($time, $url, $disable_cd_check = false)
-
-// --- Replace with ---
-function meta_refresh($time, $url, $disable_cd_check = true)
-
-// File: /ucp.php
-
-// *** Find ***
-meta_refresh(3, append_sid("{$phpbb_root_path}index.$phpEx"));
-
-// --- Replace with ---
-meta_refresh(3, append_sid(request_var('redirect', "{$phpbb_root_path}index.$phpEx")));
-
-// *** Find ***
-$message = $message . '<br /><br />' . sprintf($user->lang['RETURN_INDEX'], '<a href="' . append_sid("{$phpbb_root_path}index.$phpEx") . '">', '</a> ');
-
-// --- Replace with ---
-$message = $message . '<br /><br />' . sprintf($user->lang['RETURN_INDEX'], '<a href="' . append_sid(request_var('redirect', "{$phpbb_root_path}index.$phpEx")) . '">', '</a> ');
-```
