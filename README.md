@@ -1,16 +1,14 @@
 # WordPress-phpBB bridge
-Plugin that is used on [nam-guild.com](https://nam-guild.com) to connect Wordpress (5.x) and phpBB (3.0.14). Also includes a sidebar widget for logging onto phpBB. The widget is based upon [Mike Jolley's](http://blue-anvil.com) plugin named [Sidebar Login](http://wordpress.org/extend/plugins/sidebar-login/).
+A plugin for [WordPress](https://wordpress.org) that was used on [nam-guild.com](https://nam-guild.com) to connect WordPress (5.x) and phpBB (3.0.14). It also included a sidebar widget for logging onto phpBB. The widget was based upon [Mike Jolley](http://blue-anvil.com)'s plugin named [Sidebar Login](http://wordpress.org/extend/plugins/sidebar-login/).
 
-Originally created in 2010, and left alone except for very minor changes. Wasn't properly worked on until one day I decided to upgrade to the lastest version of Wordpress. Because of that I needed to update this plugin in order for it to work properly.
-
-19th of August 2019 I decided to make a proper repository for this plugin.
+Originally created in 2010. It was my first ever plugin, so the directory name is aptly named "test". On 19th of August 2019 this repository was created.
 
 For those that want to try it out, the following write up is based upon my notes. **NB!** May be flawed since I've only re-tried this once since 2010. Proceed at your own peril! 
 
 Anyway, here we go:
 1. Have access to a [Founder](https://wiki.phpbb.com/Founder) user on your phpBB so that you gain administrator capabilities automatically when everything is in place.
 2. Use InnoDB as storage engine. (I exported, and then edited the exported .sql file so that the tables would be re-inserted into the database using InnoDB).
-3. Best if done on a fresh Wordpress. (I did it on a existing one).
+3. Best if done on a fresh WordPress. (I did it on a existing one).
 4. Should activate the plugin first (I cheated and did this in the database the first time)
    1. Go to **Settings** -> **WordPress-phpBB bridge** for settings.
    2. Set the correct URL and path to phpBB before proceeding. 
@@ -34,7 +32,7 @@ AS
          AND user_type != 2
 WITH cascaded CHECK OPTION;
 ```
-6. Re-create *wp_usermeta* (you may be able to get away with just truncating and altering the table). Basing the following code on export from [phpMyAdmin](https://www.phpmyadmin.net/), since Wordpress updates have altered the table since I first did it:
+6. Re-create *wp_usermeta* (you may be able to get away with just truncating and altering the table). Basing the following code on export from [phpMyAdmin](https://www.phpmyadmin.net/), since WordPress updates have altered the table since I first did it:
 (Note that the inserts are for user_id 2. As the way the plugin is written now, you may be able to skip doing any inserts as long as you're a [Founder](https://wiki.phpbb.com/Founder))
 ```SQL
 ALTER TABLE wp_usermeta RENAME TO wp_usermeta_bak; 
